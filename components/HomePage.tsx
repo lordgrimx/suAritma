@@ -44,6 +44,8 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Mobil görseller
   const mobileImages = [
@@ -497,6 +499,22 @@ export default function HomePage({ hero, brands, services, products, about, revi
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
   };
 
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedProduct(null), 300);
+  };
+
+  const handleProductWhatsApp = (productName: string) => {
+    const phoneNumber = '905362363168';
+    const message = encodeURIComponent(`Merhaba, ${productName} hakkında bilgi almak istiyorum.`);
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+  };
+
   const handleScrollDown = () => {
     const heroHeight = heroSectionRef.current?.offsetHeight || 0;
     window.scrollTo({
@@ -513,6 +531,72 @@ export default function HomePage({ hero, brands, services, products, about, revi
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Product Detail Modal */}
+      {isModalOpen && selectedProduct && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={closeModal}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Product Image */}
+              <div className="relative h-96 bg-gray-100">
+                <Image
+                  src={selectedProduct.resimURL}
+                  alt={selectedProduct.baslik}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+
+              {/* Product Details */}
+              <div className="p-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  {selectedProduct.baslik}
+                </h2>
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
+                    {selectedProduct.aciklama}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                  <Button
+                    onClick={() => handleProductWhatsApp(selectedProduct.baslik)}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-6 text-lg rounded-button"
+                  >
+                    <i className="fab fa-whatsapp mr-2 text-xl"></i>
+                    WhatsApp ile Bilgi Al
+                  </Button>
+                  <Button
+                    onClick={handleCall}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg rounded-button"
+                  >
+                    <i className="fas fa-phone mr-2"></i>
+                    Hemen Ara
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section ref={heroSectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full">
@@ -743,25 +827,28 @@ export default function HomePage({ hero, brands, services, products, about, revi
                 <Card
                   key={product.id}
                   ref={(el) => { productCardsRef.current[index] = el; }}
-                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
                 >
-                  <div className="h-64 overflow-hidden relative">
+                  <div className="h-80 overflow-hidden relative bg-gray-100">
                     <Image
                       src={product.resimURL}
                       alt={product.baslik}
                       fill
-                      className="object-cover object-top"
+                      className="object-contain object-center group-hover:scale-105 transition-transform duration-300"
                       unoptimized
                     />
                   </div>
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-3">
                       {product.baslik}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 mb-4 line-clamp-3 whitespace-pre-line">
                       {product.aciklama}
                     </p>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-button whitespace-nowrap cursor-pointer">
+                    <Button 
+                      onClick={() => handleProductClick(product)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-button whitespace-nowrap cursor-pointer"
+                    >
                       Detayları İncele
                     </Button>
                   </CardContent>
