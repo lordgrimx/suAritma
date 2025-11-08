@@ -90,7 +90,6 @@ export default function HomePage({ hero, brands, services, products, about, revi
       '/3969501-uhd_3840_2160_25fps.mp4'
     ];
     let currentVideoIndex = 0;
-    let isRotationEnabled = !hero?.videoURL;
     let hasPlayed = false;
 
     // Video'yu tamamen sessiz yap (mobil için kritik)
@@ -150,17 +149,21 @@ export default function HomePage({ hero, brands, services, products, about, revi
       }
     };
 
-    // Video bittiğinde sonrakine geç
+    // Video bittiğinde sonrakine geç - HER ZAMAN rotasyon aktif
     const handleVideoEnd = () => {
-      if (isRotationEnabled) {
-        currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-        video.src = videos[currentVideoIndex];
-        video.muted = true;
-        video.load();
-      } else {
-        video.currentTime = 0;
-        video.play().catch(() => {});
-      }
+      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+      video.src = videos[currentVideoIndex];
+      video.muted = true;
+      video.load();
+      
+      // Yeni video yüklendiğinde oynat
+      const playNextVideo = () => {
+        video.play().catch((error) => {
+          console.log('⚠️ Sonraki video oynatılamadı:', error);
+        });
+        video.removeEventListener('canplay', playNextVideo);
+      };
+      video.addEventListener('canplay', playNextVideo, { once: true });
     };
 
     // Video hazır olduğunda

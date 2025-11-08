@@ -81,22 +81,40 @@ async function main() {
   await prisma.product.deleteMany()
   const products = [
     {
-      baslik: 'Premium Arıtma Sistemi',
-      aciklama: '7 aşamalı filtreleme teknolojisi',
-      resimURL: 'https://readdy.ai/api/search-image?query=modern%20water%20filtration%20system%20with%20sleek%20white%20cabinet%20design%2C%20professional%20product%20photography%2C%20clean%20white%20background%2C%20high-tech%20water%20purifier%20with%20digital%20display&width=400&height=300&seq=product001&orientation=landscape',
+      baslik: 'LG Su Arıtma Cihazı Yeni Nesil Cam Krom Tank',
+      aciklama: 'Premium tasarım cam krom tank\n5 aşamalı filtrasyon sistemi\nDijital ekran ve akıllı kontrol\nUV sterilizasyon teknolojisi\nKompakt ve modern dizayn',
+      resimURL: 'https://suaritmalglife.com/wp-content/uploads/2022/10/blore-1.jpg',
       sira: 1,
     },
     {
-      baslik: 'Kompakt Arıtma Sistemi',
-      aciklama: 'Küçük mutfaklar için ideal çözüm',
-      resimURL: 'https://readdy.ai/api/search-image?query=compact%20water%20filtration%20unit%20with%20modern%20design%2C%20professional%20product%20shot%2C%20clean%20white%20background%2C%20under-sink%20water%20purifier%20system%20with%20chrome%20faucet&width=400&height=300&seq=product002&orientation=landscape',
+      baslik: 'Tezgah Altı Su Arıtma Cihazı',
+      aciklama: 'Kompakt tezgah altı montaj\n7 aşamalı RO filtre sistemi\nMineralli su seçeneği\nKolay filtre değişim sistemi\nÜcretsiz montaj dahil',
+      resimURL: 'https://www.mekaniktesisatmarket.com/uploads/products/6002/tezgah-alti-su-aritma-cihazi-7-asama-filtreli.jpg',
       sira: 2,
     },
     {
-      baslik: 'Endüstriyel Arıtma Sistemi',
-      aciklama: 'Yüksek kapasiteli işletmeler için',
-      resimURL: 'https://readdy.ai/api/search-image?query=industrial%20grade%20water%20filtration%20system%2C%20stainless%20steel%20design%2C%20professional%20commercial%20water%20purifier%2C%20clean%20white%20background%2C%20high-capacity%20water%20treatment%20unit&width=400&height=300&seq=product003&orientation=landscape',
+      baslik: 'Endüstriyel Su Arıtma Sistemi',
+      aciklama: 'Yüksek kapasiteli endüstriyel çözüm\nOtomatik yıkama sistemi\nDijital kontrol paneli\nİşletmeler için özel tasarım\n1000 litre/gün kapasiteli',
+      resimURL: 'https://www.thewaterguy.ca/wp-content/uploads/2021/09/tw55-f70a-stainless-steel-reverse-osmosis-system.jpg',
       sira: 3,
+    },
+    {
+      baslik: 'Su Yumuşatma Sistemi',
+      aciklama: 'Kireç çözme özelliği\nOtomatik rejenerasyon\nDijital LCD ekran\nEnerji tasarruflu çalışma\nCihazlarınızı korur',
+      resimURL: 'https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-original-577x577/s3/0022/5227/brand.gif',
+      sira: 4,
+    },
+    {
+      baslik: 'Evsel Su Filtresi Tam Set',
+      aciklama: '5 aşamalı filtre seti\nKolay kurulum ve bakım\nEkonomik çözüm\nYıllık filtre paketi dahil\n2 yıl garanti',
+      resimURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnHp6yw4Qr6iOKJYGZMc0pxqVaHIwmvQRt_g&s',
+      sira: 5,
+    },
+    {
+      baslik: 'Alkalin İyonlaştırıcı Su Arıtma',
+      aciklama: 'Alkalin su üretimi (pH 8-10)\nAntioksidan özellikli su\n9 aşamalı filtrasyon\nMinerallendirilmiş su\nSağlıklı yaşam için ideal',
+      resimURL: 'https://aquagerman.com/wp-content/uploads/2018/10/german-water-alkaline-water-ionizer-1.jpg',
+      sira: 6,
     },
   ]
   for (const product of products) {
