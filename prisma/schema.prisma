@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HeroSection {
+  id          String   @id @default(cuid())
+  baslik      String
+  altBaslik   String
+  butonMetni  String
+  videoURL    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  isim      String
+  logoURL   String
+  sira      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  baslik    String
+  aciklama  String
+  ikon      String
+  sira      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  baslik    String
+  aciklama  String
+  resimURL  String
+  sira      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AboutSection {
+  id         String   @id @default(cuid())
+  baslik     String
+  paragraflar Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  isim      String
+  konum     String
+  yorum     String
+  rating    Int      @default(5) // 1-5 yıldız arası
+  sira      Int
+  satir     Int      // 0 veya 1 (hangi satırda görüneceği)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id               String   @id @default(cuid())
+  telefon          String
+  telefonlar       Json     @default("[]") // Ek telefon numaraları
+  adres            String
+  calismaSaatleri  String
+  haritaURL        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Footer {
+  id        String   @id @default(cuid())
+  metin     String
+  linkler   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  id         String   @id @default(cuid())
+  siteName   String
+  siteURL    String
+  logoURL    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
