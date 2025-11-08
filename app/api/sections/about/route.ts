@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -29,6 +32,7 @@ export async function POST(request: NextRequest) {
       data: { baslik, paragraflar },
     })
 
+    revalidatePath('/')
     return NextResponse.json(about)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create about section' }, { status: 500 })
@@ -51,6 +55,7 @@ export async function PUT(request: NextRequest) {
       data: { baslik, paragraflar },
     })
 
+    revalidatePath('/')
     return NextResponse.json(about)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update about section' }, { status: 500 })

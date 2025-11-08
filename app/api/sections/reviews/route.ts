@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -32,6 +35,7 @@ export async function POST(request: NextRequest) {
       data: { isim, konum, yorum, rating: rating || 5, sira, satir },
     })
 
+    revalidatePath('/')
     return NextResponse.json(review)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create review' }, { status: 500 })
@@ -54,6 +58,7 @@ export async function PUT(request: NextRequest) {
       data: { isim, konum, yorum, rating: rating || 5, sira, satir },
     })
 
+    revalidatePath('/')
     return NextResponse.json(review)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update review' }, { status: 500 })
@@ -79,6 +84,7 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     })
 
+    revalidatePath('/')
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete review' }, { status: 500 })

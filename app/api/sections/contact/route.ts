@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -35,6 +38,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Revalidate homepage cache
+    revalidatePath('/')
+    revalidatePath('/api/sections/contact')
+
     return NextResponse.json(contact)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create contact info' }, { status: 500 })
@@ -62,6 +69,10 @@ export async function PUT(request: NextRequest) {
         haritaURL 
       },
     })
+
+    // Revalidate homepage cache
+    revalidatePath('/')
+    revalidatePath('/api/sections/contact')
 
     return NextResponse.json(contact)
   } catch (error) {

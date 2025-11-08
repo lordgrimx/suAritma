@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -29,6 +32,7 @@ export async function POST(request: NextRequest) {
       data: { isim, logoURL, sira },
     })
 
+    revalidatePath('/')
     return NextResponse.json(brand)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create brand' }, { status: 500 })
@@ -51,6 +55,7 @@ export async function PUT(request: NextRequest) {
       data: { isim, logoURL, sira },
     })
 
+    revalidatePath('/')
     return NextResponse.json(brand)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update brand' }, { status: 500 })
@@ -76,6 +81,7 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     })
 
+    revalidatePath('/')
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete brand' }, { status: 500 })

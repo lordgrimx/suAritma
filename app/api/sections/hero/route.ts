@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
@@ -34,6 +37,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    revalidatePath('/')
     return NextResponse.json(hero)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create hero section' }, { status: 500 })
@@ -61,6 +65,7 @@ export async function PUT(request: NextRequest) {
       },
     })
 
+    revalidatePath('/')
     return NextResponse.json(hero)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update hero section' }, { status: 500 })

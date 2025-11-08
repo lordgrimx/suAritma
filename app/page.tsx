@@ -1,6 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import HomePage from '@/components/HomePage'
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getData() {
   try {
     const [hero, brands, services, products, about, reviews, contact] = await Promise.all([
