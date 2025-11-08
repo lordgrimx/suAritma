@@ -42,9 +42,42 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [isDeleting, setIsDeleting] = useState(false);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Video rotation effect - Mobile compatible with aggressive autoplay
+  // Mobil görseller
+  const mobileImages = [
+    'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=1920&h=1080&fit=crop', // Bardağa su doldurma
+    'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop', // İnsan su içiyor
+    'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1920&h=1080&fit=crop', // Musluktan su akıyor
+  ];
+
+  // Mobil cihaz algılama
   useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isMobileDevice = /iphone|ipad|ipod|android|webos|blackberry|windows phone/.test(userAgent);
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsMobile(isMobileDevice || isTouchDevice);
+    };
+    
+    checkMobile();
+  }, []);
+
+  // Mobil cihazlarda görsel rotasyonu
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % mobileImages.length);
+    }, 5000); // 5 saniyede bir değiştir
+
+    return () => clearInterval(interval);
+  }, [isMobile, mobileImages.length]);
+
+  // Video rotation effect - Desktop only
+  useEffect(() => {
+    if (isMobile) return; // Mobilde video yok
     const video = videoRef.current;
     if (!video) return;
 
@@ -481,28 +514,70 @@ export default function HomePage({ hero, brands, services, products, about, revi
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section ref={heroSectionRef} className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0" onClick={(e) => {
-          const video = videoRef.current;
-          if (video && video.paused) {
-            video.muted = true;
-            video.play().catch(() => {});
-          }
-        }}>
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            playsInline
-            preload="metadata"
-            loop={false}
-            controls={false}
-            disablePictureInPicture
-            disableRemotePlayback
-            x-webkit-airplay="deny"
-          >
-            <source src={hero?.videoURL || '/3958714-hd_1920_1080_30fps.mp4'} type="video/mp4" />
-          </video>
+        <div className="absolute inset-0">
+          {isMobile ? (
+            // Mobil cihazlarda statik görseller
+            <>
+              {mobileImages.map((img, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`Su Arıtma ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                    quality={90}
+                    sizes="100vw"
+                  />
+                </div>
+              ))}
+              {/* Mobil için gösterge noktaları */}
+              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+                {mobileImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      index === currentImageIndex 
+                        ? 'bg-white w-8' 
+                        : 'bg-white/50 hover:bg-white/75'
+                    }`}
+                    aria-label={`Görsel ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            // Desktop'ta video
+            <div onClick={(e) => {
+              const video = videoRef.current;
+              if (video && video.paused) {
+                video.muted = true;
+                video.play().catch(() => {});
+              }
+            }}>
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+                loop={false}
+                controls={false}
+                disablePictureInPicture
+                disableRemotePlayback
+                x-webkit-airplay="deny"
+              >
+                <source src={hero?.videoURL || '/3958714-hd_1920_1080_30fps.mp4'} type="video/mp4" />
+              </video>
+            </div>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-8 flex items-center w-full">
