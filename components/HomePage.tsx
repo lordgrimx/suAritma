@@ -47,9 +47,10 @@ export default function HomePage({ hero, brands, services, products, about, revi
 
   // Mobil görseller
   const mobileImages = [
-    'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=1920&h=1080&fit=crop', // Bardağa su doldurma
-    'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop', // İnsan su içiyor
-    'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=1920&h=1080&fit=crop', // Musluktan su akıyor
+    'https://images.pexels.com/photos/416528/pexels-photo-416528.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    'https://images.pexels.com/photos/66346/pexels-photo-66346.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    'https://images.pexels.com/photos/3768585/pexels-photo-3768585.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    'https://images.pexels.com/photos/3943905/pexels-photo-3943905.jpeg?auto=compress&cs=tinysrgb&w=1920',
   ];
 
   // Mobil cihaz algılama
@@ -513,8 +514,8 @@ export default function HomePage({ hero, brands, services, products, about, revi
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section ref={heroSectionRef} className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
+      <section ref={heroSectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 w-full h-full">
           {isMobile ? (
             // Mobil cihazlarda statik görseller
             <>
@@ -529,10 +530,11 @@ export default function HomePage({ hero, brands, services, products, about, revi
                     src={img}
                     alt={`Su Arıtma ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover object-center"
                     priority={index === 0}
                     quality={90}
                     sizes="100vw"
+                    unoptimized
                   />
                 </div>
               ))}
@@ -563,7 +565,7 @@ export default function HomePage({ hero, brands, services, products, about, revi
             }}>
               <video
                 ref={videoRef}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover object-center"
                 autoPlay
                 muted
                 playsInline
