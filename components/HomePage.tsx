@@ -43,7 +43,7 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
-  // Video rotation effect - Mobile compatible
+  // Video rotation effect - Mobile compatible with aggressive autoplay
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -54,81 +54,130 @@ export default function HomePage({ hero, brands, services, products, about, revi
       '/3969501-uhd_3840_2160_25fps.mp4'
     ];
     let currentVideoIndex = 0;
-    let isRotationEnabled = !hero?.videoURL; // Hero video varsa rotation yok
+    let isRotationEnabled = !hero?.videoURL;
+    let hasPlayed = false;
 
-    // Video oynatmayı dene (mobil uyumlu)
+    // Video'yu tamamen sessiz yap (mobil için kritik)
+    video.muted = true;
+    video.defaultMuted = true;
+    video.volume = 0;
+    video.setAttribute('muted', 'true');
+    video.setAttribute('playsinline', 'true');
+
+    // Video oynatma fonksiyonu - çok agresif
     const attemptPlay = async () => {
+      if (hasPlayed) return;
+
       try {
-        await video.play();
-        // Video başarıyla oynatıldı
-      } catch (error) {
-        // Autoplay engellendi (mobil tarayıcılar)
-        console.log('Video autoplay engellendi, kullanıcı etkileşimi bekleniyor');
+        // Video'yu tekrar mute et (garanti için)
+        video.muted = true;
+        video.volume = 0;
         
-        // Kullanıcı etkileşimi sonrası oynat
+        const playPromise = video.play();
+        
+        if (playPromise !== undefined) {
+          await playPromise;
+          hasPlayed = true;
+          console.log('✅ Video başarıyla oynatıldı');
+        }
+      } catch (error: any) {
+        console.log('⚠️ Video autoplay engellendi:', error.message);
+        
+        // Kullanıcı etkileşimi bekle - çok kapsamlı
         const playOnInteraction = async () => {
+          if (hasPlayed) return;
+          
           try {
+            video.muted = true;
             await video.play();
+            hasPlayed = true;
+            console.log('✅ Video kullanıcı etkileşimi ile oynatıldı');
           } catch (e) {
-            // Hata yok sayılıyor
+            console.log('❌ Video hala oynatılamadı');
           }
-          // Event listener'ları temizle
-          document.removeEventListener('touchstart', playOnInteraction);
-          document.removeEventListener('click', playOnInteraction);
-          document.removeEventListener('scroll', playOnInteraction);
         };
         
-        // İlk kullanıcı etkileşiminde oynat
-        document.addEventListener('touchstart', playOnInteraction, { once: true, passive: true });
-        document.addEventListener('click', playOnInteraction, { once: true });
-        document.addEventListener('scroll', playOnInteraction, { once: true, passive: true });
+        // Tüm olası user interaction event'lerini dinle
+        const events = ['touchstart', 'touchend', 'click', 'scroll', 'mousemove', 'keydown'];
+        events.forEach(eventType => {
+          document.addEventListener(eventType, playOnInteraction, { once: true, passive: true });
+        });
+
+        // Video element'ine direkt tıklama
+        video.addEventListener('click', playOnInteraction, { once: true });
+        
+        // Hero section'a tıklama
+        if (heroSectionRef.current) {
+          heroSectionRef.current.addEventListener('click', playOnInteraction, { once: true });
+          heroSectionRef.current.addEventListener('touchstart', playOnInteraction, { once: true, passive: true });
+        }
       }
     };
 
-    // Video yüklendiğinde oynatmayı dene
-    const handleCanPlay = () => {
-      attemptPlay();
-    };
-
-    // Video bittiğinde sonrakine geç (sadece rotation aktifse)
+    // Video bittiğinde sonrakine geç
     const handleVideoEnd = () => {
       if (isRotationEnabled) {
         currentVideoIndex = (currentVideoIndex + 1) % videos.length;
         video.src = videos[currentVideoIndex];
-        video.load(); // Yeni video'yu yükle
+        video.muted = true;
+        video.load();
       } else {
-        // Hero video varsa tekrar başlat
         video.currentTime = 0;
-        video.play().catch(console.error);
+        video.play().catch(() => {});
       }
     };
 
-    // Video yükleme hatası
-    const handleError = (e: Event) => {
-      console.error('Video yükleme hatası:', e);
+    // Video hazır olduğunda
+    const handleCanPlay = () => {
+      attemptPlay();
+    };
+
+    // Video metadata yüklendiğinde
+    const handleLoadedMetadata = () => {
+      video.muted = true;
+      attemptPlay();
     };
 
     // İlk video'yu ayarla
     const initialVideoSrc = hero?.videoURL || videos[0];
     video.src = initialVideoSrc;
+    video.load();
 
     // Event listener'ları ekle
-    video.addEventListener('canplay', handleCanPlay, { once: true });
-    video.addEventListener('loadeddata', handleCanPlay, { once: true });
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('canplaythrough', handleCanPlay);
+    video.addEventListener('loadeddata', handleCanPlay);
     video.addEventListener('ended', handleVideoEnd);
-    video.addEventListener('error', handleError);
 
-    // Eğer video zaten yüklendiyse hemen oynatmayı dene
-    if (video.readyState >= 3) {
+    // Hemen oynatmayı dene
+    if (video.readyState >= 2) {
       attemptPlay();
     }
 
+    // 500ms sonra tekrar dene (video yüklendiyse)
+    const retryTimeout = setTimeout(() => {
+      if (!hasPlayed && video.readyState >= 2) {
+        attemptPlay();
+      }
+    }, 500);
+
+    // 1500ms sonra tekrar dene (son şans)
+    const finalRetryTimeout = setTimeout(() => {
+      if (!hasPlayed && video.readyState >= 2) {
+        attemptPlay();
+      }
+    }, 1500);
+
     // Cleanup
     return () => {
+      clearTimeout(retryTimeout);
+      clearTimeout(finalRetryTimeout);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('canplaythrough', handleCanPlay);
       video.removeEventListener('loadeddata', handleCanPlay);
       video.removeEventListener('ended', handleVideoEnd);
-      video.removeEventListener('error', handleError);
     };
   }, [hero?.videoURL]);
 
@@ -432,15 +481,25 @@ export default function HomePage({ hero, brands, services, products, about, revi
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section ref={heroSectionRef} className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
+        <div className="absolute inset-0" onClick={(e) => {
+          const video = videoRef.current;
+          if (video && video.paused) {
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        }}>
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
             autoPlay
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             loop={false}
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            x-webkit-airplay="deny"
           >
             <source src={hero?.videoURL || '/3958714-hd_1920_1080_30fps.mp4'} type="video/mp4" />
           </video>
