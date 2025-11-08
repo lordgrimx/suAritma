@@ -172,8 +172,9 @@ async function main() {
   await prisma.contactInfo.deleteMany()
   const contact = await prisma.contactInfo.create({
     data: {
-      telefon: '0536 236 31 68',
-      adres: 'Diyarbakır Merkez',
+      telefon: '+90 536 236 31 68 (Hamdi USTA)',
+      telefonlar: ['+90 530 391 77 21'],
+      adres: 'Ahmet Kaya Cd., Bağcılar, 21090 Bağlar/Diyarbakır',
       calismaSaatleri: '7/24 Acil Servis',
       haritaURL: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d40.230621!3d37.914864!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDU0JzUzLjUiTiA0MMKwMTMnNTAuMiJF!5e0!3m2!1str!2str!4v1635789012345!5m2!1str!2str',
     },

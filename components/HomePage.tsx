@@ -43,7 +43,7 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
-  // Video rotation effect
+  // Video rotation effect - Mobile compatible
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -54,16 +54,83 @@ export default function HomePage({ hero, brands, services, products, about, revi
       '/3969501-uhd_3840_2160_25fps.mp4'
     ];
     let currentVideoIndex = 0;
+    let isRotationEnabled = !hero?.videoURL; // Hero video varsa rotation yok
 
-    const handleVideoEnd = () => {
-      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-      video.src = videos[currentVideoIndex];
-      video.play().catch(console.error);
+    // Video oynatmayı dene (mobil uyumlu)
+    const attemptPlay = async () => {
+      try {
+        await video.play();
+        // Video başarıyla oynatıldı
+      } catch (error) {
+        // Autoplay engellendi (mobil tarayıcılar)
+        console.log('Video autoplay engellendi, kullanıcı etkileşimi bekleniyor');
+        
+        // Kullanıcı etkileşimi sonrası oynat
+        const playOnInteraction = async () => {
+          try {
+            await video.play();
+          } catch (e) {
+            // Hata yok sayılıyor
+          }
+          // Event listener'ları temizle
+          document.removeEventListener('touchstart', playOnInteraction);
+          document.removeEventListener('click', playOnInteraction);
+          document.removeEventListener('scroll', playOnInteraction);
+        };
+        
+        // İlk kullanıcı etkileşiminde oynat
+        document.addEventListener('touchstart', playOnInteraction, { once: true, passive: true });
+        document.addEventListener('click', playOnInteraction, { once: true });
+        document.addEventListener('scroll', playOnInteraction, { once: true, passive: true });
+      }
     };
 
+    // Video yüklendiğinde oynatmayı dene
+    const handleCanPlay = () => {
+      attemptPlay();
+    };
+
+    // Video bittiğinde sonrakine geç (sadece rotation aktifse)
+    const handleVideoEnd = () => {
+      if (isRotationEnabled) {
+        currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+        video.src = videos[currentVideoIndex];
+        video.load(); // Yeni video'yu yükle
+      } else {
+        // Hero video varsa tekrar başlat
+        video.currentTime = 0;
+        video.play().catch(console.error);
+      }
+    };
+
+    // Video yükleme hatası
+    const handleError = (e: Event) => {
+      console.error('Video yükleme hatası:', e);
+    };
+
+    // İlk video'yu ayarla
+    const initialVideoSrc = hero?.videoURL || videos[0];
+    video.src = initialVideoSrc;
+
+    // Event listener'ları ekle
+    video.addEventListener('canplay', handleCanPlay, { once: true });
+    video.addEventListener('loadeddata', handleCanPlay, { once: true });
     video.addEventListener('ended', handleVideoEnd);
-    return () => video.removeEventListener('ended', handleVideoEnd);
-  }, []);
+    video.addEventListener('error', handleError);
+
+    // Eğer video zaten yüklendiyse hemen oynatmayı dene
+    if (video.readyState >= 3) {
+      attemptPlay();
+    }
+
+    // Cleanup
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadeddata', handleCanPlay);
+      video.removeEventListener('ended', handleVideoEnd);
+      video.removeEventListener('error', handleError);
+    };
+  }, [hero?.videoURL]);
 
   // Text animation effect
   useEffect(() => {
@@ -329,7 +396,9 @@ export default function HomePage({ hero, brands, services, products, about, revi
   }, []);
 
   const handleCall = () => {
-    window.location.href = `tel:${contact?.telefon?.replace(/\s/g, '')}`;
+    // Telefon numarasından sadece sayıları çıkar (parantez ve metinleri temizle)
+    const phoneNumber = contact?.telefon?.replace(/[^\d+]/g, '') || '905362363168';
+    window.location.href = `tel:${phoneNumber}`;
   };
 
   const handleScrollToTop = () => {
@@ -370,6 +439,8 @@ export default function HomePage({ hero, brands, services, products, about, revi
             autoPlay
             muted
             playsInline
+            preload="auto"
+            loop={false}
           >
             <source src={hero?.videoURL || '/3958714-hd_1920_1080_30fps.mp4'} type="video/mp4" />
           </video>
