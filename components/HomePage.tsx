@@ -42,8 +42,22 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [isDeleting, setIsDeleting] = useState(false);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isIOS, setIsIOS] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
-  // Video rotation effect - Mobile compatible with aggressive autoplay
+  // iOS Detection
+  useEffect(() => {
+    const checkIOS = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+      const isIOSSafari = /safari/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
+      setIsIOS(isIOSDevice || isIOSSafari);
+    };
+    
+    checkIOS();
+  }, []);
+
+  // Video rotation effect - iOS compatible with explicit user interaction
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -57,19 +71,28 @@ export default function HomePage({ hero, brands, services, products, about, revi
     let isRotationEnabled = !hero?.videoURL;
     let hasPlayed = false;
 
-    // Video'yu tamamen sessiz yap (mobil için kritik)
+    // iOS için özel video ayarları
     video.muted = true;
     video.defaultMuted = true;
     video.volume = 0;
-    video.setAttribute('muted', 'true');
-    video.setAttribute('playsinline', 'true');
+    video.playsInline = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    
+    // iOS için ek attribute'lar
+    if (isIOS) {
+      video.setAttribute('autoplay', '');
+      video.setAttribute('x5-video-player-type', 'h5');
+      video.setAttribute('x5-video-player-fullscreen', 'false');
+      video.setAttribute('x5-video-orientation', 'portraint');
+    }
 
-    // Video oynatma fonksiyonu - çok agresif
+    // Video oynatma fonksiyonu - iOS için optimize edilmiş
     const attemptPlay = async () => {
       if (hasPlayed) return;
 
       try {
-        // Video'yu tekrar mute et (garanti için)
         video.muted = true;
         video.volume = 0;
         
@@ -78,35 +101,44 @@ export default function HomePage({ hero, brands, services, products, about, revi
         if (playPromise !== undefined) {
           await playPromise;
           hasPlayed = true;
+          setVideoPlaying(true);
           console.log('✅ Video başarıyla oynatıldı');
         }
       } catch (error: any) {
-        console.log('⚠️ Video autoplay engellendi:', error.message);
+        console.log('⚠️ Video autoplay engellendi (iOS olabilir):', error.message);
         
-        // Kullanıcı etkileşimi bekle - çok kapsamlı
+        // iOS için kullanıcı etkileşimi bekle
         const playOnInteraction = async () => {
           if (hasPlayed) return;
           
           try {
             video.muted = true;
+            video.volume = 0;
+            video.load(); // iOS için kritik
+            
+            // Küçük bir gecikme ekle (iOS için)
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             await video.play();
             hasPlayed = true;
-            console.log('✅ Video kullanıcı etkileşimi ile oynatıldı');
+            setVideoPlaying(true);
+            console.log('✅ Video kullanıcı etkileşimi ile oynatıldı (iOS)');
           } catch (e) {
             console.log('❌ Video hala oynatılamadı');
           }
         };
         
-        // Tüm olası user interaction event'lerini dinle
-        const events = ['touchstart', 'touchend', 'click', 'scroll', 'mousemove', 'keydown'];
+        // iOS için özelleştirilmiş event listener'lar
+        const events = isIOS 
+          ? ['touchstart', 'touchend', 'click'] 
+          : ['touchstart', 'touchend', 'click', 'scroll', 'mousemove', 'keydown'];
+        
         events.forEach(eventType => {
           document.addEventListener(eventType, playOnInteraction, { once: true, passive: true });
         });
 
-        // Video element'ine direkt tıklama
         video.addEventListener('click', playOnInteraction, { once: true });
         
-        // Hero section'a tıklama
         if (heroSectionRef.current) {
           heroSectionRef.current.addEventListener('click', playOnInteraction, { once: true });
           heroSectionRef.current.addEventListener('touchstart', playOnInteraction, { once: true, passive: true });
@@ -127,21 +159,41 @@ export default function HomePage({ hero, brands, services, products, about, revi
       }
     };
 
+    // Video play event
+    const handlePlay = () => {
+      setVideoPlaying(true);
+      hasPlayed = true;
+    };
+
+    // Video pause event
+    const handlePause = () => {
+      setVideoPlaying(false);
+    };
+
     // Video hazır olduğunda
     const handleCanPlay = () => {
-      attemptPlay();
+      if (!hasPlayed) {
+        attemptPlay();
+      }
     };
 
     // Video metadata yüklendiğinde
     const handleLoadedMetadata = () => {
       video.muted = true;
-      attemptPlay();
+      video.volume = 0;
+      if (!hasPlayed) {
+        attemptPlay();
+      }
     };
 
     // İlk video'yu ayarla
     const initialVideoSrc = hero?.videoURL || videos[0];
     video.src = initialVideoSrc;
-    video.load();
+    
+    // iOS için video load
+    if (isIOS) {
+      video.load();
+    }
 
     // Event listener'ları ekle
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -149,37 +201,49 @@ export default function HomePage({ hero, brands, services, products, about, revi
     video.addEventListener('canplaythrough', handleCanPlay);
     video.addEventListener('loadeddata', handleCanPlay);
     video.addEventListener('ended', handleVideoEnd);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
 
-    // Hemen oynatmayı dene
-    if (video.readyState >= 2) {
+    // Hemen oynatmayı dene (iOS olmayan cihazlarda)
+    if (!isIOS && video.readyState >= 2) {
       attemptPlay();
     }
 
-    // 500ms sonra tekrar dene (video yüklendiyse)
+    // Retry mekanizması
     const retryTimeout = setTimeout(() => {
       if (!hasPlayed && video.readyState >= 2) {
         attemptPlay();
       }
     }, 500);
 
-    // 1500ms sonra tekrar dene (son şans)
     const finalRetryTimeout = setTimeout(() => {
       if (!hasPlayed && video.readyState >= 2) {
         attemptPlay();
       }
     }, 1500);
 
+    // iOS için gecikmeli deneme
+    const iosRetryTimeout = isIOS ? setTimeout(() => {
+      if (!hasPlayed && video.readyState >= 2) {
+        video.load();
+        attemptPlay();
+      }
+    }, 2000) : null;
+
     // Cleanup
     return () => {
       clearTimeout(retryTimeout);
       clearTimeout(finalRetryTimeout);
+      if (iosRetryTimeout) clearTimeout(iosRetryTimeout);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('canplaythrough', handleCanPlay);
       video.removeEventListener('loadeddata', handleCanPlay);
       video.removeEventListener('ended', handleVideoEnd);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
     };
-  }, [hero?.videoURL]);
+  }, [hero?.videoURL, isIOS]);
 
   // Text animation effect
   useEffect(() => {
@@ -485,7 +549,11 @@ export default function HomePage({ hero, brands, services, products, about, revi
           const video = videoRef.current;
           if (video && video.paused) {
             video.muted = true;
-            video.play().catch(() => {});
+            video.volume = 0;
+            video.load();
+            setTimeout(() => {
+              video.play().catch(() => {});
+            }, 100);
           }
         }}>
           <video
@@ -494,15 +562,50 @@ export default function HomePage({ hero, brands, services, products, about, revi
             autoPlay
             muted
             playsInline
-            preload="metadata"
+            preload={isIOS ? "auto" : "metadata"}
             loop={false}
             controls={false}
             disablePictureInPicture
             disableRemotePlayback
             x-webkit-airplay="deny"
+            webkit-playsinline="true"
           >
             <source src={hero?.videoURL || '/3958714-hd_1920_1080_30fps.mp4'} type="video/mp4" />
           </video>
+          
+          {/* iOS için play overlay (video oynamıyorsa) */}
+          {isIOS && !videoPlaying && (
+            <div 
+              className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm cursor-pointer z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                const video = videoRef.current;
+                if (video) {
+                  video.muted = true;
+                  video.volume = 0;
+                  video.load();
+                  setTimeout(() => {
+                    video.play().catch(() => {});
+                  }, 100);
+                }
+              }}
+            >
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center mb-4 mx-auto hover:bg-white transition-all transform hover:scale-110">
+                  <svg 
+                    className="w-10 h-10 text-blue-900 ml-1" 
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <p className="text-white text-lg font-semibold drop-shadow-lg">
+                  Videoyu Oynat
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-8 flex items-center w-full">
