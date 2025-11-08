@@ -176,7 +176,7 @@ async function main() {
       telefonlar: ['+90 530 391 77 21'],
       adres: 'Ahmet Kaya Cd., Bağcılar, 21090 Bağlar/Diyarbakır',
       calismaSaatleri: '7/24 Acil Servis',
-      haritaURL: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509374!2d40.230621!3d37.914864!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDU0JzUzLjUiTiA0MMKwMTMnNTAuMiJF!5e0!3m2!1str!2str!4v1635789012345!5m2!1str!2str',
+      haritaURL: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3147.8008836341255!2d40.12970657569962!3d37.911716571951175!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40751ed5780d5ab1%3A0xb42f0cdc28edc28c!2zQmHEn2PEsWxhciwgQWhtZXQgS2F5YSBDZC4sIDIxMDkwIEJhxJ9sYXIvRGl5YXJiYWvEsXI!5e0!3m2!1str!2str!4v1762612111699!5m2!1str!2str',
     },
   })
   console.log('✅ İletişim bilgileri oluşturuldu')
