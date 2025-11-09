@@ -46,6 +46,7 @@ export default function HomePage({ hero, brands, services, products, about, revi
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAllProducts, setShowAllProducts] = useState(false);
 
   // Mobil görseller
   const mobileImages = [
@@ -507,6 +508,11 @@ export default function HomePage({ hero, brands, services, products, about, revi
     setIsModalOpen(true);
   };
 
+  const getDisplayedProducts = () => {
+    const limit = isMobile ? 3 : 6;
+    return showAllProducts ? products : products.slice(0, limit);
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setTimeout(() => setSelectedProduct(null), 300);
@@ -825,8 +831,10 @@ export default function HomePage({ hero, brands, services, products, about, revi
             <h2 className="text-4xl font-bold text-center text-blue-900 mb-16">
               Öne Çıkan Ürünlerimiz
             </h2>
+
+            {/* Product Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {products.map((product, index) => (
+              {getDisplayedProducts().map((product, index) => (
                 <Card
                   key={product.id}
                   ref={(el) => { productCardsRef.current[index] = el; }}
@@ -848,7 +856,7 @@ export default function HomePage({ hero, brands, services, products, about, revi
                     <p className="text-gray-600 mb-4 line-clamp-3 whitespace-pre-line">
                       {product.aciklama}
                     </p>
-                    <Button 
+                    <Button
                       onClick={() => handleProductClick(product)}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-button whitespace-nowrap cursor-pointer"
                     >
@@ -858,6 +866,18 @@ export default function HomePage({ hero, brands, services, products, about, revi
                 </Card>
               ))}
             </div>
+
+            {/* Show More Button */}
+            {products.length > (isMobile ? 3 : 6) && (
+              <div className="text-center mt-12">
+                <Button
+                  onClick={() => setShowAllProducts(!showAllProducts)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105"
+                >
+                  {showAllProducts ? 'Daha Az Göster' : 'Daha Fazla Göster'}
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       )}
