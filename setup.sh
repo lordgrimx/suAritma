@@ -73,7 +73,7 @@ cd /var/www/mizraksu
 # GitHub'dan projeyi çekme (değiştirmeniz gerekebilir)
 echo "📥 Proje GitHub'dan çekiliyor..."
 # Not: Burayı kendi repository adresinizle değiştirin
-# git clone https://github.com/kullanici-adiniz/mizraksu-web.git .
+git clone https://github.com/lordgrimx/suAritma.git
 print_info "Proje dosyalarını manuel olarak /var/www/mizraksu dizinine kopyalayın"
 
 # Environment dosyası oluşturma
@@ -84,7 +84,7 @@ DATABASE_URL="postgresql://mizraksu:mizraksu123@localhost:5432/mizraksu"
 
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key-here-change-this-in-production"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://mizraksuaritma.com.tr"
 
 # Admin kullanıcıları (virgülle ayrılmış e-posta adresleri)
 ADMIN_EMAILS="admin@mizraksu.com"
@@ -150,7 +150,7 @@ echo "🌐 Nginx konfigürasyonu yapılıyor..."
 sudo cat > /etc/nginx/sites-available/mizraksu << 'EOF'
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com;  # Burayı kendi domaininizle değiştirin
+    server_name mizraksuaritma.com.tr www.mizraksuaritma.com.tr;  # Domain güncellendi
 
     # HTTP'den HTTPS'e yönlendirme (SSL kurduktan sonra)
     # return 301 https://$server_name$request_uri;
@@ -196,7 +196,7 @@ echo "🔒 SSL kurulumu için certbot kuruluyor..."
 sudo apt install -y certbot python3-certbot-nginx
 
 print_success "Kurulum tamamlandı!"
-print_info "SSL sertifikası almak için: sudo certbot --nginx -d your-domain.com -d www.your-domain.com"
+print_info "SSL sertifikası almak için: sudo certbot --nginx -d mizraksuaritma.com.tr -d www.mizraksuaritma.com.tr"
 
 echo ""
 echo "🎉 Mızrak Su Arıtma Sistemleri başarıyla kuruldu!"
@@ -211,7 +211,7 @@ echo "   • PM2 log: pm2 logs"
 echo ""
 echo "⚠️  Yapmanız gerekenler:"
 echo "   1. Domain adresinizi Nginx konfigürasyonunda güncelleyin"
-echo "   2. SSL sertifikası alın (sudo certbot --nginx -d domain.com)"
+echo "   2. SSL sertifikası alın (sudo certbot --nginx -d mizraksuaritma.com.tr -d www.mizraksuaritma.com.tr)"
 echo "   3. .env dosyasında NEXTAUTH_SECRET'i değiştirin"
 echo "   4. Admin e-posta adreslerini güncelleyin"
 echo "   5. Proje dosyalarını /var/www/mizraksu dizinine kopyalayın"
