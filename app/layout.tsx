@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mizraksuaritma.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://mizraksuaritma.com.tr'),
   title: "Mızrak Su Arıtma Sistemleri - Diyarbakır | Su Arıtma Cihazı",
   description: "Diyarbakır'da su arıtma sistemleri, bakım, onarım ve filtre değişimi hizmetleri. Mızrak Su Arıtma ile 15 yılı aşkın tecrübemizle Diyarbakır'ın her noktasına profesyonel su arıtma çözümleri sunuyoruz. 7/24 servis hizmeti.",
   keywords: [
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
-    url: 'https://mizraksuaritma.com',
+    url: 'https://mizraksuaritma.com.tr',
     siteName: 'Mızrak Su Arıtma Sistemleri',
     title: 'Mızrak Su Arıtma Sistemleri - Diyarbakır | Su Arıtma Cihazı',
     description: "Diyarbakır'da su arıtma sistemleri, bakım, onarım ve filtre değişimi hizmetleri. 15 yılı aşkın tecrübemizle Diyarbakır'ın her noktasına profesyonel su arıtma çözümleri.",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     images: ['/logo.svg'],
   },
   alternates: {
-    canonical: 'https://mizraksuaritma.com',
+    canonical: 'https://mizraksuaritma.com.tr',
   },
   category: 'Su Arıtma Sistemleri',
   classification: 'Su Arıtma, Bakım ve Servis',

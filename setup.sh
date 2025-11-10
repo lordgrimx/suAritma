@@ -70,11 +70,13 @@ sudo mkdir -p /var/www/mizraksu
 sudo chown -R $USER:$USER /var/www/mizraksu
 cd /var/www/mizraksu
 
-# GitHub'dan projeyi çekme (değiştirmeniz gerekebilir)
+# GitHub'dan projeyi çekme
 echo "📥 Proje GitHub'dan çekiliyor..."
-# Not: Burayı kendi repository adresinizle değiştirin
-git clone https://github.com/lordgrimx/suAritma.git
-print_info "Proje dosyalarını manuel olarak /var/www/mizraksu dizinine kopyalayın"
+git clone https://github.com/lordgrimx/suAritma.git temp_repo
+echo "📦 Proje dosyaları taşınıyor..."
+mv temp_repo/* temp_repo/.* . 2>/dev/null || true
+rm -rf temp_repo
+print_success "Proje dosyaları başarıyla yüklendi!"
 
 # Environment dosyası oluşturma
 echo "⚙️  Environment dosyası oluşturuluyor..."
